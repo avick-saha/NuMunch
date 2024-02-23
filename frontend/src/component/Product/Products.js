@@ -10,22 +10,17 @@ import { useAlert } from "react-alert";
 import Typography from "@material-ui/core/Typography";
 import MetaData from "../layout/MetaData";
 
-const categories = [
-  "Veg",
-  "Non Veg",
-  "Breverage",
-];
+const categories = ["Veg", "Non Veg", "Beverage"];
 
 const Products = ({ match }) => {
   const dispatch = useDispatch();
-
   const alert = useAlert();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [price, setPrice] = useState([0, 25000]);
+  const [price, setPrice] = useState([25, 150]);
   const [category, setCategory] = useState("");
-
   const [ratings, setRatings] = useState(0);
+  const [applyChanges, setApplyChanges] = useState(false); // State to track whether changes have been applied
 
   const {
     products,
@@ -45,6 +40,27 @@ const Products = ({ match }) => {
   const priceHandler = (event, newPrice) => {
     setPrice(newPrice);
   };
+
+  const handleInputChange = (index, event) => {
+    const values = [...price];
+    values[index] = event.target.value;
+    setPrice(values);
+  };
+
+  const handleInputBlur = (index) => {
+    const values = [...price];
+    if (values[index] < 0) {
+      values[index] = 0;
+    } else if (values[index] > 25000) {
+      values[index] = 25000;
+    }
+    setPrice(values);
+  };
+
+  const handleApplyChanges = () => {
+    setApplyChanges(true);
+  };
+
   let count = filteredProductsCount;
 
   useEffect(() => {
@@ -53,8 +69,12 @@ const Products = ({ match }) => {
       dispatch(clearErrors());
     }
 
-    dispatch(getProduct(keyword, currentPage, price, category, ratings));
-  }, [dispatch, keyword, currentPage, price, category, ratings, alert, error]);
+    // Fetch products only if changes have been applied
+    if (applyChanges) {
+      dispatch(getProduct(keyword, currentPage, price, category, ratings));
+      setApplyChanges(false); // Reset applyChanges state after applying changes
+    }
+  }, [dispatch, keyword, currentPage, price, category, ratings, alert, error, applyChanges]);
 
   return (
     <Fragment>
@@ -80,9 +100,26 @@ const Products = ({ match }) => {
               valueLabelDisplay="auto"
               aria-labelledby="range-slider"
               min={25}
-              max={100}
+              max={150}
             />
-
+            <div className="price-inputs">
+              <span>From</span>
+              <input
+                type="number"
+                value={price[0]}
+                onChange={(e) => handleInputChange(0, e)}
+                onBlur={() => handleInputBlur(0)}
+              />
+              <span>To</span>
+              <input
+                type="number"
+                value={price[1]}
+                onChange={(e) => handleInputChange(1, e)}
+                onBlur={() => handleInputBlur(1)}
+              />
+            </div>
+            <button className="apply-changes-button" onClick={handleApplyChanges}>Apply</button> {/* Button to apply changes */}
+            
             <Typography>Categories</Typography>
             <ul className="categoryBox">
               {categories.map((category) => (
