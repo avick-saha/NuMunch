@@ -295,14 +295,16 @@ const OrderList = ({ history }) => {
         <div className="productListContainer">
           <h1 id="productListHeading">ALL ORDERS</h1>
 
+          <div style={{ height: 600, width: "100%", overflow: "auto" }}>
           <DataGrid
             rows={rows}
             columns={columns}
-            pageSize={10}
+            pageSize={30}
             disableSelectionOnClick
             className="productListTable"
             autoHeight
           />
+          </div>
         </div>
       </div>
     </Fragment>
