@@ -2,7 +2,7 @@ import React from "react";
 import "./aboutSection.css";
 import 'font-awesome/css/font-awesome.min.css';
 import divyansh from "../About/img/divyansh.jpeg";
-import krish from "../About/img/krish.jpeg";
+import krish from "../About/img/krish.jpg";
 import kartik from "../About/img/kartik.jpeg";
 import ranil from "../About/img/ranil.jpeg";
 import ankit from "../About/img/ankit.jpeg";
