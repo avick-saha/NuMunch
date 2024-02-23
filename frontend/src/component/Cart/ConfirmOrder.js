@@ -42,22 +42,31 @@ const ConfirmOrder = ({ history }) => {
           window.location.href = res.data.url;
         }
       })
-      .catch((error) => console.log(error));
-
-  
+      .catch((error) => console.log(error)); 
   };
 
 
-  // const proceedToPayment = async (e) => {
-  //   const amount = 5006769;
+
+
+  // const proceedToRazorpayPayment = async (e) => {
+  //   const amount = totalPrice * 1000;
   //   const currency = "INR";
   //   const receiptId = "qwsaq1";
-  //   const response = await fetch("http://localhost:4000/api/v1/payment/process", {
+  //   const data = {
+  //     user: user,
+  //     cartItems: cartItems,
+  //     shippingCharges : shippingCharges,
+  //     totalPrice : totalPrice,
+  //     shippingInfo : shippingInfo,
+  //     tax : tax,
+  //   };
+  //   const response = await fetch("http://localhost:4000/api/v1/process-payment-razorpay", {
   //     method: "POST",
   //     body: JSON.stringify({
   //       amount,
   //       currency,
   //       receipt: receiptId,
+  //       data
   //     }),
   //     headers: {
   //       "Content-Type": "application/json",
@@ -67,7 +76,7 @@ const ConfirmOrder = ({ history }) => {
   //   console.log(order);
 
   //   var options = {
-  //     key: "rzp_test_9DvZVBgEEJiLUy", // Enter the Key ID generated from the Dashboard
+  //     key: "rzp_test_E6ALvvisDKdfNS", // Enter the Key ID generated from the Dashboard
   //     amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
   //     currency,
   //     name: "Acme Corp", //your business name
@@ -80,7 +89,7 @@ const ConfirmOrder = ({ history }) => {
   //       };
 
   //       const validateRes = await fetch(
-  //         "http://localhost:4000/api/v1/payment/process/validate",
+  //         "http://localhost:4000/api/v1/validate-payment-razorpay",
   //         {
   //           method: "POST",
   //           body: JSON.stringify(body),
@@ -118,6 +127,95 @@ const ConfirmOrder = ({ history }) => {
   //   rzp1.open();
   //   e.preventDefault();
   // };
+
+  const proceedToRazorpayPayment = async (e) => {
+    const amount = subtotal * 100; // Correcting the amount calculation (remove the extra zero)
+    const currency = "INR";
+    const receiptId = "qwsaq1";
+    const data = {
+      user: user,
+      cartItems: cartItems,
+      shippingCharges : shippingCharges,
+      totalPrice : totalPrice,
+      shippingInfo : shippingInfo,
+      tax : tax,
+    };
+    try {
+      // Step 1: Create Order
+      const orderResponse = await fetch("http://localhost:4000/api/v1/process-payment-razorpay", {
+        method: "POST",
+        body: JSON.stringify({
+          amount,
+          currency,
+          receipt: receiptId,
+          data
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const order = await orderResponse.json();
+      console.log(order);
+
+      // Step 2: Initialize Razorpay
+      var options = {
+        key: "rzp_test_E6ALvvisDKdfNS",
+        amount,
+        currency,
+        name: "Acme Corp",
+        description: "Test Transaction",
+        image: "https://example.com/your_logo",
+        order_id: order.id,
+        handler: async function (response) {
+          try {
+            const validateResponse = await fetch(
+              "http://localhost:4000/api/v1/validate-payment-razorpay",
+              {
+                method: "POST",
+                body: JSON.stringify(response), // Send the entire response object for validation
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              }
+            );
+            const jsonRes = await validateResponse.json();
+            console.log(jsonRes); // this line shows the error message
+
+          } catch (error) {
+            console.error('Error:', error);
+            // Handle error (e.g., show error message to the user)
+          }
+        },
+        prefill: {
+          name: "Web Dev Matrix",
+          email: "webdevmatrix@example.com",
+          contact: "9000000000",
+        },
+        notes: {
+          address: "Razorpay Corporate Office",
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+      var rzp1 = new window.Razorpay(options);
+      rzp1.on("payment.failed", function (response) {
+        alert(response.error.code);
+        alert(response.error.description);
+        alert(response.error.source);
+        alert(response.error.step);
+        alert(response.error.reason);
+        alert(response.error.metadata.order_id);
+        alert(response.error.metadata.payment_id);
+      });
+      rzp1.open();
+      e.preventDefault();
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle error (e.g., show error message to the user)
+    }
+};
+
 
 
 
@@ -186,10 +284,11 @@ const ConfirmOrder = ({ history }) => {
               <p>
                 <b>Total:</b>
               </p>
-              <span>₹{totalPrice}</span>
+              <span>₹{subtotal}</span>
             </div>
 
-            <button onClick={proceedToPayment}>Proceed To Payment</button>
+            <button onClick={proceedToPayment}>Proceed To Pay with Stripe</button>
+            <button onClick={proceedToRazorpayPayment}>Proceed to Pay with Razorpay</button>
           </div>
         </div>
       </div>
