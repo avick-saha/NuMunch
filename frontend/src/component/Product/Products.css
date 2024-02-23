@@ -16,6 +16,43 @@
   min-height: 30vh;
 }
 
+/* Add these styles */
+.price-inputs {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px; /* Adjust margin as needed */
+}
+
+.apply-changes-button {
+  border-radius: 50px;
+  width: 125px; /* Adjust width as needed */
+  background-color: tomato;
+  color: white;
+  height: 25px; /* Adjust height as needed */
+  font-size: 14px; /* Adjust font size as needed */
+  margin-top: 10px; /* Adjust margin top as needed */
+  border: 0;
+}
+
+.apply-changes-button:hover {
+  background-color: rgba(21, 61, 238, 0.862);
+  transition: all 0.5s;;
+}
+
+.price-inputs input {
+  width: 40px; /* Adjust width as needed */
+  padding: 5px;
+  font-size: 14px; /* Adjust font size as needed */
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  text-align: center;
+}
+
+.price-inputs span {
+  margin: 0 5px; /* Adjust margin as needed */
+}
+
 .paginationBox {
   display: flex;
   justify-content: center;
@@ -75,6 +112,7 @@
 
 .categoryBox {
   padding: 0%;
+  
 }
 
 .category-link {
@@ -89,9 +127,6 @@
   color: tomato;
 }
 
-.filterBox > fieldset {
-  border: 1px solid rgba(0, 0, 0, 0.329);
-}
 
 @media screen and (max-width: 600px) {
   .filterBox {
