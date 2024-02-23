@@ -13,6 +13,11 @@ const Profile = ({ history }) => {
       history.push("/login");
     }
   }, [history, isAuthenticated]);
+
+  const handleBackToProducts = () => {
+    history.push("/products");
+  };
+  
   return (
     <Fragment>
       {loading ? (
@@ -25,6 +30,7 @@ const Profile = ({ history }) => {
               <h1>My Profile</h1>
               <img src={user.avatar.url} alt={user.name} />
               <Link to="/me/update">Edit Profile</Link>
+              <button className="backButton" onClick={handleBackToProducts}>Back</button>
             </div>
             <div>
               <div>
