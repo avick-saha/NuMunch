@@ -9,6 +9,25 @@
   background-color: white;
 }
 
+.backButton {
+  background-color: tomato; /* Green */
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin-top: -20px; /* Adjust margin as needed */
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease; /* Add transition effect */
+}
+
+.backButton:hover {
+  background-color: rgb(204, 78, 56); /* Darker green on hover */
+}
+
 .profileContainer > div {
   display: flex;
   height: 100vh;
