@@ -17,10 +17,9 @@ const Products = ({ match }) => {
   const alert = useAlert();
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [price, setPrice] = useState([25, 150]);
+  const [priceFilter, setPriceFilter] = useState([25, 150]);
   const [category, setCategory] = useState("");
-  const [ratings, setRatings] = useState(0);
-  const [applyChanges, setApplyChanges] = useState(false); // State to track whether changes have been applied
+  const [priceChanged, setPriceChanged] = useState(false); // New state to track if price has changed
 
   const {
     products,
@@ -33,48 +32,33 @@ const Products = ({ match }) => {
 
   const keyword = match.params.keyword;
 
-  const setCurrentPageNo = (e) => {
-    setCurrentPage(e);
+  useEffect(() => {
+    // Fetch products when the component mounts
+    dispatch(getProduct(keyword, currentPage, priceFilter, category));
+  }, [dispatch, keyword]);
+
+  useEffect(() => {
+    // Fetch products when price filter changes
+    if (priceChanged) {
+      dispatch(getProduct(keyword, currentPage, priceFilter, category));
+      setPriceChanged(false); // Reset priceChanged state after fetching products
+    }
+  }, [dispatch, keyword, currentPage, priceFilter, category, priceChanged]);
+
+  const setCurrentPageNo = (pageNumber) => {
+    setCurrentPage(pageNumber);
   };
 
   const priceHandler = (event, newPrice) => {
-    setPrice(newPrice);
+    // Update the price filter state without fetching products immediately
+    setPriceFilter(newPrice);
   };
 
-  const handleInputChange = (index, event) => {
-    const values = [...price];
-    values[index] = event.target.value;
-    setPrice(values);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // Set priceChanged state to true to trigger fetching products
+    setPriceChanged(true);
   };
-
-  const handleInputBlur = (index) => {
-    const values = [...price];
-    if (values[index] < 0) {
-      values[index] = 0;
-    } else if (values[index] > 25000) {
-      values[index] = 25000;
-    }
-    setPrice(values);
-  };
-
-  const handleApplyChanges = () => {
-    setApplyChanges(true);
-  };
-
-  let count = filteredProductsCount;
-
-  useEffect(() => {
-    if (error) {
-      alert.error(error);
-      dispatch(clearErrors());
-    }
-
-    // Fetch products only if changes have been applied
-    if (applyChanges) {
-      dispatch(getProduct(keyword, currentPage, price, category, ratings));
-      setApplyChanges(false); // Reset applyChanges state after applying changes
-    }
-  }, [dispatch, keyword, currentPage, price, category, ratings, alert, error, applyChanges]);
 
   return (
     <Fragment>
@@ -94,32 +78,32 @@ const Products = ({ match }) => {
 
           <div className="filterBox">
             <Typography>Price</Typography>
-            <Slider
-              value={price}
-              onChange={priceHandler}
-              valueLabelDisplay="auto"
-              aria-labelledby="range-slider"
-              min={25}
-              max={150}
-            />
-            <div className="price-inputs">
-              <span>From</span>
-              <input
-                type="number"
-                value={price[0]}
-                onChange={(e) => handleInputChange(0, e)}
-                onBlur={() => handleInputBlur(0)}
+            <form onSubmit={handleSubmit}>
+              <Slider
+                value={priceFilter}
+                onChange={priceHandler}
+                valueLabelDisplay="auto"
+                aria-labelledby="range-slider"
+                min={25}
+                max={150}
               />
-              <span>To</span>
-              <input
-                type="number"
-                value={price[1]}
-                onChange={(e) => handleInputChange(1, e)}
-                onBlur={() => handleInputBlur(1)}
-              />
-            </div>
-            <button className="apply-changes-button" onClick={handleApplyChanges}>Apply</button> {/* Button to apply changes */}
-            
+              <div className="price-inputs">
+                <span>From</span>
+                <input
+                  type="number"
+                  value={priceFilter[0]}
+                  onChange={(e) => setPriceFilter([e.target.value, priceFilter[1]])}
+                />
+                <span>To</span>
+                <input
+                  type="number"
+                  value={priceFilter[1]}
+                  onChange={(e) => setPriceFilter([priceFilter[0], e.target.value])}
+                />
+              </div>
+              <button type="submit">Apply</button>
+            </form>
+
             <Typography>Categories</Typography>
             <ul className="categoryBox">
               {categories.map((category) => (
@@ -132,22 +116,8 @@ const Products = ({ match }) => {
                 </li>
               ))}
             </ul>
-
-            <fieldset>
-              <Typography component="legend">Ratings Above</Typography>
-              <Slider
-                value={ratings}
-                onChange={(e, newRating) => {
-                  setRatings(newRating);
-                }}
-                aria-labelledby="continuous-slider"
-                valueLabelDisplay="auto"
-                min={0}
-                max={5}
-              />
-            </fieldset>
           </div>
-          {resultPerPage < count && (
+          {resultPerPage < filteredProductsCount && (
             <div className="paginationBox">
               <Pagination
                 activePage={currentPage}
